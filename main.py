@@ -6,7 +6,7 @@ import requests
 def get_pokemon_data(pokemon_id_or_name):
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id_or_name}/"
     data = requests.get(url)
-    return data
+    return data.json()
 
 
 class Quiz:
@@ -15,3 +15,5 @@ class Quiz:
         self.quiz_type = quiz_type
         self.gen = gen
 
+
+print(get_pokemon_data(1008)["name"])
