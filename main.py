@@ -52,13 +52,19 @@ def whos_that_pokemon():
             message = 'Incorrect! Please try again. '
             pokemon_data = get_pokemon_data(correct_answer)
             pokemon_name = pokemon_data['name']
-            pokemon_type = ', '.join([t['type']['name'] for t in pokemon_data['types']])
+            types_str = ""
+            for t in pokemon_data['types']:
+                types_str += t['type']['name'] + ", "
+            pokemon_type = types_str[:-2]
             pokemon_id = pokemon_data['id']
             pokemon_generation = get_pokemon_generation(pokemon_id)
     else:
         pokemon_data = get_random_pokemon()
         pokemon_name = pokemon_data['name']
-        pokemon_type = ', '.join([t['type']['name'] for t in pokemon_data['types']])
+        types_str = ""
+        for t in pokemon_data['types']:
+            types_str += t['type']['name'] + ", "
+        pokemon_type = types_str[:-2]
         pokemon_id = pokemon_data['id']
         pokemon_generation = get_pokemon_generation(pokemon_id)
         message = f'Guess the Pokemon with typing {pokemon_type}, introduced in generation {pokemon_generation}.'
