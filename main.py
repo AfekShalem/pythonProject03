@@ -49,7 +49,7 @@ def whos_that_pokemon():
                 </html>
             '''
         else:
-            message = 'Incorrect! Please try again.'
+            message = 'Incorrect! Please try again. '
             pokemon_data = get_pokemon_data(correct_answer)
             pokemon_name = pokemon_data['name']
             pokemon_type = ', '.join([t['type']['name'] for t in pokemon_data['types']])
@@ -74,6 +74,59 @@ def whos_that_pokemon():
                 <form method="post">
                     <input type="text" name="pokemon-name">
                     <input type="hidden" name="correct_answer" value="{pokemon_name}">
+                    <input type="submit" value="Guess">
+                </form>
+            </body>
+        </html>
+    '''
+    return html
+
+
+@app.route('/type-quiz', methods=['GET', 'POST'])
+def type_quiz():
+    """Guess pokemon types when given sprite"""
+    if request.method == 'POST':
+        pokemon_name = request.form['pokemon-name'].lower()
+        pokemon_data = get_pokemon_data(pokemon_name)
+        pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
+        user_types = request.form['pokemon-types'].lower().split(',')
+        check = all(item in sorted(user_types) for item in sorted(pokemon_types))
+
+        if check is True:
+            return f'''
+                <html>
+                    <head>
+                        <title>Confirmation Page</title>
+                    </head>
+                    <body>
+                        <h1>Congratulations, you got it right! You are so hot!!!!</h1>
+                    </body>
+                </html>
+            '''
+        else:
+            message = "Incorrect! Please try again. \n Format like this:  'type1,type2' \n Don't use spaces!"
+            pokemon_data = get_pokemon_data(pokemon_name)
+            pokemon_name = pokemon_data['name']
+            pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
+    else:
+        pokemon_data = get_random_pokemon()
+        pokemon_name = pokemon_data['name']
+        pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
+        message = f"What are the types of {pokemon_name}? \n Format like this:  'type1,type2' \n Don't use spaces!"
+
+    html = f'''
+        <html>
+            <head>
+                <title>Type Quiz</title>
+            </head>
+            <body>
+                <h1>Type Quiz</h1>
+                <p>{message}</p>
+                <img src="{pokemon_data['sprites']['front_default']}" alt="{pokemon_name} sprite">
+                <form method="post">
+                    <input type="text" name="pokemon-name" value="{pokemon_name}" style="display:none">
+                    <input type="text" name="correct_types" value="{','.join(sorted(pokemon_types))}" style="display:none">
+                    <input type="text" name="pokemon-types">
                     <input type="submit" value="Guess">
                 </form>
             </body>
