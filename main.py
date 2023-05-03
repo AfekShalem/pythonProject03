@@ -94,9 +94,12 @@ def type_quiz():
     if request.method == 'POST':
         pokemon_name = request.form['pokemon-name'].lower()
         pokemon_data = get_pokemon_data(pokemon_name)
-        pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
+        types_str = ""
+        for t in pokemon_data['types']:
+            types_str += t['type']['name'] + ", "
+        pokemon_type = types_str[:-2]
         user_types = request.form['pokemon-types'].lower().split(',')
-        check = all(item in sorted(user_types) for item in sorted(pokemon_types))
+        check = all(item in sorted(user_types) for item in sorted(pokemon_type))
 
         if check is True:
             return f'''
