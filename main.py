@@ -2,15 +2,15 @@
 import random
 from flask import Flask, request, Response
 import requests
-
-
-def get_pokemon_data(pokemon_id_or_name):
-    url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id_or_name}/"
-    data = requests.get(url)
-    return data.json()
-
+from pokemon import Pokemon
 
 app = Flask(__name__)
+
+
+def get_random_pokemon():
+    """Returns a random pokemon from the full list of pokemon"""
+    pokemon = Pokemon(random.randint(0, 1008))
+    return pokemon
 
 
 @app.route('/')
@@ -34,8 +34,6 @@ def whos_that_pokemon():
         pokemon_name = request.form['pokemon-name'].lower()
         correct_answer = request.form['correct_answer']
         if pokemon_name == correct_answer:
-            pokemon_data = get_pokemon_data(correct_answer)
-            pokemon_name = pokemon_data['name']
             pokemon_image_url = pokemon_data['sprites']['front_default']
             return f'''
                 <html>
@@ -57,12 +55,12 @@ def whos_that_pokemon():
                 types_str += t['type']['name'] + ", "
             pokemon_type = types_str[:-2]
             pokemon_id = pokemon_data['id']
-            pokemon_generation = get_pokemon_generation(pokemon_id)
+            pokemon_generation = pokemon.pokemon_generation
     else:
-        pokemon_data = get_random_pokemon()
-        pokemon_name = pokemon_data['name']
+        pokemon = get_random_pokemon()
+        pokemon_name = pokemon.pokemon_name
         types_str = ""
-        for t in pokemon_data['types']:
+        for t in pokemon.pokemon_types:
             types_str += t['type']['name'] + ", "
         pokemon_type = types_str[:-2]
         pokemon_id = pokemon_data['id']
@@ -90,19 +88,13 @@ def whos_that_pokemon():
 
 @app.route('/type-quiz', methods=['GET', 'POST'])
 def type_quiz():
-    """Guess pokemon types when given sprite"""
     if request.method == 'POST':
-        pokemon_name = request.form['pokemon-name'].lower()
-        pokemon_data = get_pokemon_data(pokemon_name)
-        types_str = ""
-        for t in pokemon_data['types']:
-            types_str += t['type']['name'] + ", "
-        pokemon_type = types_str[:-2]
-        user_types = request.form['pokemon-types'].lower().split(',')
-        check = all(item in sorted(user_types) for item in sorted(pokemon_type))
+        pokemon = Pokemon(request.form['pokemon-name'])
+        user_types = request.form['pokemon-types'].lower().replace(" ", "").split(',')
+        correct_types = [t['type']['name'] for t in pokemon.pokemon_types]
 
-        if check is True:
-            return f'''
+        if user_types == correct_types:
+            return '''
                 <html>
                     <head>
                         <title>Confirmation Page</title>
@@ -113,15 +105,13 @@ def type_quiz():
                 </html>
             '''
         else:
-            message = "Incorrect! Please try again. \n Format like this:  'type1,type2' \n Don't use spaces!"
-            pokemon_data = get_pokemon_data(pokemon_name)
-            pokemon_name = pokemon_data['name']
-            pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
+            message = "Incorrect! Please try again. Format like this: 'type1,type2'. Don't use spaces!"
+
     else:
-        pokemon_data = get_random_pokemon()
-        pokemon_name = pokemon_data['name']
-        pokemon_types = [t['type']['name'] for t in pokemon_data['types']]
-        message = f"What are the types of {pokemon_name}? \n Format like this:  'type1,type2' \n Don't use spaces!"
+        pokemon = get_random_pokemon()
+        message = f"What are the types of {pokemon.pokemon_name}? Format like this: 'type1,type2'. Don't use spaces!"
+
+    types_str, pokemon_type = generate_type_strings(pokemon)
 
     html = f'''
         <html>
@@ -131,32 +121,24 @@ def type_quiz():
             <body>
                 <h1>Type Quiz</h1>
                 <p>{message}</p>
-                <img src="{pokemon_data['sprites']['front_default']}" alt="{pokemon_name} sprite">
+                <img src="{pokemon.pokemon_sprite}" alt="{pokemon.pokemon_name} sprite">
                 <form method="post">
-                    <input type="text" name="pokemon-name" value="{pokemon_name}" style="display:none">
-                    <input type="text" name="correct_types" value="{','.join(sorted(pokemon_types))}" style="display:none">
+                    <input type="text" name="pokemon-name" value="{pokemon.pokemon_name}" style="display:none">
+                    <input type="text" name="correct_types" value="{','.join(sorted(pokemon_type))}" style="display:none">
                     <input type="text" name="pokemon-types">
                     <input type="submit" value="Guess">
                 </form>
             </body>
-        </html>
-    '''
+        </html>'''
     return html
 
 
-def get_random_pokemon():
-    response = requests.get('https://pokeapi.co/api/v2/pokemon/?limit=1118')
-    pokemon_list = response.json()['results']
-    pokemon_url = pokemon_list[random.randint(0, len(pokemon_list) - 1)]['url']
-    pokemon_data = requests.get(pokemon_url).json()
-    return pokemon_data
-
-
-def get_pokemon_generation(pokemon_id):
-    response = requests.get(f'https://pokeapi.co/api/v2/pokemon-species/{pokemon_id}/')
-    generation_url = response.json()['generation']['url']
-    generation_name = generation_url.split('/')[-2]
-    return generation_name
+def generate_type_strings(pokemon):
+    types_str = ""
+    for t in pokemon.pokemon_types:
+        types_str += t['type']['name'] + ", "
+    pokemon_type = types_str[:-2]
+    return types_str, pokemon_type
 
 
 class Quiz:
