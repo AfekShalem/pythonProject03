@@ -21,6 +21,7 @@ def home():
                 <ul style="list-style:none">
                     <li><a href="/whos-that-pokemon">Who's That Pokemon?</a></li>
                     <li><a href="/type-quiz">Type Quiz</a></li>
+                    <li><a href="/pokemon-search">Pokemon Search</a></li>
                 </ul>
             </body>
             </html>
@@ -32,9 +33,10 @@ def home():
 def whos_that_pokemon():
     if request.method == 'POST':
         pokemon_name = request.form['pokemon-name'].lower()
-        correct_answer = request.form['correct_answer']
+        correct_answer = request.form['correct_answer'].lower()
         if pokemon_name == correct_answer:
-            pokemon_image_url = pokemon_data['sprites']['front_default']
+            pokemon = Pokemon(correct_answer)
+            pokemon_image_url = pokemon.pokemon_sprite
             return f'''
                 <html>
                     <head>
@@ -42,20 +44,20 @@ def whos_that_pokemon():
                     </head>
                     <body>
                         <h1>Congratulations, you got it right!</h1>
-                        <img src="{pokemon_image_url}" alt="{pokemon_name} image">
+                        <img src="{pokemon_image_url}" alt="{correct_answer} image">
                     </body>
                 </html>
             '''
         else:
-            message = 'Incorrect! Please try again. '
-            pokemon_data = get_pokemon_data(correct_answer)
-            pokemon_name = pokemon_data['name']
+            correct_pokemon = Pokemon(correct_answer)
+            pokemon_name = correct_pokemon.pokemon_name
             types_str = ""
-            for t in pokemon_data['types']:
+            for t in correct_pokemon.pokemon_types:
                 types_str += t['type']['name'] + ", "
             pokemon_type = types_str[:-2]
-            pokemon_id = pokemon_data['id']
-            pokemon_generation = pokemon.pokemon_generation
+            pokemon_id = correct_pokemon.pokemon_id
+            pokemon_generation = correct_pokemon.pokemon_generation
+            message = f'Incorrect! Please try again. The typing is {pokemon_type} and it was introduced in generation {pokemon_generation}'
     else:
         pokemon = get_random_pokemon()
         pokemon_name = pokemon.pokemon_name
@@ -63,8 +65,8 @@ def whos_that_pokemon():
         for t in pokemon.pokemon_types:
             types_str += t['type']['name'] + ", "
         pokemon_type = types_str[:-2]
-        pokemon_id = pokemon_data['id']
-        pokemon_generation = get_pokemon_generation(pokemon_id)
+        pokemon_id = pokemon.pokemon_id
+        pokemon_generation = pokemon.pokemon_generation
         message = f'Guess the Pokemon with typing {pokemon_type}, introduced in generation {pokemon_generation}.'
 
     html = f'''
@@ -100,7 +102,7 @@ def type_quiz():
                         <title>Confirmation Page</title>
                     </head>
                     <body>
-                        <h1>Congratulations, you got it right! You are so hot!!!!</h1>
+                        <h1>Congratulations, you got it right!</h1>
                     </body>
                 </html>
             '''
@@ -133,19 +135,55 @@ def type_quiz():
     return html
 
 
+@app.route('/pokemon-search', methods=['GET', 'POST'])
+def pokemon_search():
+    if request.method == 'POST':
+        pokemon_name = request.form['pokemon-name'].lower()
+        pokemon = Pokemon(pokemon_name)
+        pokemon_image_url = pokemon.pokemon_sprite
+        types_str = ""
+        for t in pokemon.pokemon_types:
+            types_str += t['type']['name'] + ", "
+        pokemon_type = types_str[:-2]
+        pokemon_id = pokemon.pokemon_id
+        pokemon_name = pokemon.pokemon_name
+
+        return f'''
+            <html>
+                <head>
+                    <title>Pokemon Details</title>
+                </head>
+                <body>
+                    <h1>{pokemon_name}</h1>
+                    <p>ID: {pokemon_id}</p>
+                    <p>Type: {pokemon_type}</p>
+                    <img src="{pokemon_image_url}" alt="{pokemon_name} image">
+                </body>
+            </html>
+        '''
+    else:
+        return '''
+            <html>
+                <head>
+                    <title>Pokemon Details</title>
+                </head>
+                <body>
+                    <h1>Enter a Pokemon's Name or ID</h1>
+                    <form method="post">
+                        <input type="text" name="pokemon-name">
+                        <input type="submit" value="Submit">
+                    </form>
+                </body>
+            </html>
+        '''
+
+
 def generate_type_strings(pokemon):
     types_str = ""
     for t in pokemon.pokemon_types:
         types_str += t['type']['name'] + ", "
     pokemon_type = types_str[:-2]
     return types_str, pokemon_type
-
-
-class Quiz:
-
-    def __init__(self, quiz_type, gen):
-        self.quiz_type = quiz_type
-        self.gen = gen
 
 
 if __name__ == '__main__':
