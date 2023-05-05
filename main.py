@@ -36,7 +36,6 @@ def whos_that_pokemon():
         correct_answer = request.form['correct_answer'].lower()
         if pokemon_name == correct_answer:
             pokemon = Pokemon(correct_answer)
-            pokemon_image_url = pokemon.pokemon_sprite
             return f'''
                 <html>
                     <head>
@@ -44,7 +43,7 @@ def whos_that_pokemon():
                     </head>
                     <body>
                         <h1>Congratulations, you got it right!</h1>
-                        <img src="{pokemon_image_url}" alt="{correct_answer} image">
+                        <img src="{pokemon.pokemon_sprite}" alt="{correct_answer} image">
                     </body>
                 </html>
             '''
@@ -55,9 +54,9 @@ def whos_that_pokemon():
             for t in correct_pokemon.pokemon_types:
                 types_str += t['type']['name'] + ", "
             pokemon_type = types_str[:-2]
-            pokemon_id = correct_pokemon.pokemon_id
             pokemon_generation = correct_pokemon.pokemon_generation
             message = f'Incorrect! Please try again. The typing is {pokemon_type} and it was introduced in generation {pokemon_generation}'
+            message2 = f'Description: {correct_pokemon.pokemon_desc}'
     else:
         pokemon = get_random_pokemon()
         pokemon_name = pokemon.pokemon_name
@@ -65,9 +64,9 @@ def whos_that_pokemon():
         for t in pokemon.pokemon_types:
             types_str += t['type']['name'] + ", "
         pokemon_type = types_str[:-2]
-        pokemon_id = pokemon.pokemon_id
         pokemon_generation = pokemon.pokemon_generation
         message = f'Guess the Pokemon with typing {pokemon_type}, introduced in generation {pokemon_generation}.'
+        message2 = f'Description: {pokemon.pokemon_desc}'
 
     html = f'''
         <html>
@@ -77,6 +76,7 @@ def whos_that_pokemon():
             <body>
                 <h1>Who's That Pokemon?</h1>
                 <p>{message}</p>
+                <p>{message2}</p>
                 <form method="post">
                     <input type="text" name="pokemon-name">
                     <input type="hidden" name="correct_answer" value="{pokemon_name}">

@@ -16,6 +16,14 @@ class Pokemon:
         generation_data = requests.get(generation_url).json()
         generation_num = generation_data['generation']['url'].split("/")[-2]
         self.pokemon_generation = int(generation_num)
+        char_url = f"https://pokeapi.co/api/v2/pokemon-species/{pokemon_id_or_name}/"
+        desc_data = requests.get(char_url).json()
+        entries = desc_data["flavor_text_entries"]
+        self.pokemon_desc = None
+        for entry in entries:
+            if entry['language']['name'] == 'en':
+                self.pokemon_desc = entry['flavor_text']
+                break
 
 
 
