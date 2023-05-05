@@ -93,27 +93,27 @@ def type_quiz():
     if request.method == 'POST':
         pokemon = Pokemon(request.form['pokemon-name'])
         user_types = request.form['pokemon-types'].lower().replace(" ", "").split(',')
-        correct_types = [t['type']['name'] for t in pokemon.pokemon_types]
+        correct_types = sorted([t['type']['name'] for t in pokemon.pokemon_types])
 
-        if user_types == correct_types:
+        if sorted(user_types) == sorted(correct_types):
             return '''
                 <html>
                     <head>
                         <title>Confirmation Page</title>
                     </head>
                     <body>
-                        <h1>Congratulations, you got it right!</h1>
+                        <h1>Congratulations, you got it right! Trevor and Afek love you!</h1>
                     </body>
                 </html>
             '''
         else:
-            message = "Incorrect! Please try again. Format like this: 'type1,type2'. Don't use spaces!"
+            message = "Incorrect! Please try again. Use a comma to separate the types!"
 
     else:
         pokemon = get_random_pokemon()
         message = f"What are the types of {pokemon.pokemon_name}? Format like this: 'type1,type2'. Don't use spaces!"
 
-    types_str, pokemon_type = generate_type_strings(pokemon)
+    types_str, pokemon_type = get_type_strings(pokemon)
 
     html = f'''
         <html>
@@ -126,7 +126,7 @@ def type_quiz():
                 <img src="{pokemon.pokemon_sprite}" alt="{pokemon.pokemon_name} sprite">
                 <form method="post">
                     <input type="text" name="pokemon-name" value="{pokemon.pokemon_name}" style="display:none">
-                    <input type="text" name="correct_types" value="{','.join(sorted(pokemon_type))}" style="display:none">
+                    <input type="text" name="correct_types" value="{pokemon_type}" style="display:none">
                     <input type="text" name="pokemon-types">
                     <input type="submit" value="Guess">
                 </form>
@@ -140,13 +140,10 @@ def pokemon_search():
     if request.method == 'POST':
         pokemon_name = request.form['pokemon-name'].lower()
         pokemon = Pokemon(pokemon_name)
-        pokemon_image_url = pokemon.pokemon_sprite
         types_str = ""
         for t in pokemon.pokemon_types:
             types_str += t['type']['name'] + ", "
         pokemon_type = types_str[:-2]
-        pokemon_id = pokemon.pokemon_id
-        pokemon_name = pokemon.pokemon_name
 
         return f'''
             <html>
@@ -154,10 +151,10 @@ def pokemon_search():
                     <title>Pokemon Details</title>
                 </head>
                 <body>
-                    <h1>{pokemon_name}</h1>
-                    <p>ID: {pokemon_id}</p>
+                    <h1>{pokemon.pokemon_name}</h1>
+                    <p>ID: {pokemon.pokemon_id}</p>
                     <p>Type: {pokemon_type}</p>
-                    <img src="{pokemon_image_url}" alt="{pokemon_name} image">
+                    <img src="{pokemon.pokemon_sprite}" alt="{pokemon_name} image">
                 </body>
             </html>
         '''
@@ -178,7 +175,7 @@ def pokemon_search():
         '''
 
 
-def generate_type_strings(pokemon):
+def get_type_strings(pokemon):
     types_str = ""
     for t in pokemon.pokemon_types:
         types_str += t['type']['name'] + ", "
