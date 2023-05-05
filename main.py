@@ -45,6 +45,7 @@ def whos_that_pokemon():
                     <body>
                         <h1>Congratulations, you got it right!</h1>
                         <img src="{pokemon_image_url}" alt="{correct_answer} image">
+                        <h1><a href="/">Go back to home</a></h1>
                     </body>
                 </html>
             '''
@@ -103,6 +104,7 @@ def type_quiz():
                     </head>
                     <body>
                         <h1>Congratulations, you got it right! Trevor and Afek love you!</h1>
+                        <h1><a href="/">Go back to home</a></h1>
                     </body>
                 </html>
             '''
@@ -155,6 +157,7 @@ def pokemon_search():
                     <p>ID: {pokemon.pokemon_id}</p>
                     <p>Type: {pokemon_type}</p>
                     <img src="{pokemon.pokemon_sprite}" alt="{pokemon_name} image">
+                    <h1><a href="/">Go back to home</a></h1>
                 </body>
             </html>
         '''
