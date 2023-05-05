@@ -44,6 +44,7 @@ def whos_that_pokemon():
                     <body>
                         <h1>Congratulations, you got it right!</h1>
                         <img src="{pokemon.pokemon_sprite}" alt="{correct_answer} image">
+                        <h1><a href="/">Go back to home</a></h1>
                     </body>
                 </html>
             '''
