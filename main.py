@@ -54,6 +54,7 @@ def whos_that_pokemon():
             for t in correct_pokemon.pokemon_types:
                 types_str += t['type']['name'] + ", "
             pokemon_type = types_str[:-2]
+            pokemon_id = correct_pokemon.pokemon_id
             pokemon_generation = correct_pokemon.pokemon_generation
             message = f'Incorrect! Please try again. The typing is {pokemon_type} and it was introduced in generation {pokemon_generation}'
             message2 = f'Description: {correct_pokemon.pokemon_desc}'
@@ -64,6 +65,7 @@ def whos_that_pokemon():
         for t in pokemon.pokemon_types:
             types_str += t['type']['name'] + ", "
         pokemon_type = types_str[:-2]
+        pokemon_id = pokemon.pokemon_id
         pokemon_generation = pokemon.pokemon_generation
         message = f'Guess the Pokemon with typing {pokemon_type}, introduced in generation {pokemon_generation}.'
         message2 = f'Description: {pokemon.pokemon_desc}'
@@ -103,6 +105,7 @@ def type_quiz():
                     </head>
                     <body>
                         <h1>Congratulations, you got it right! Trevor and Afek love you!</h1>
+                        <h1><a href="/">Go back to home</a></h1>
                     </body>
                 </html>
             '''
@@ -155,6 +158,7 @@ def pokemon_search():
                     <p>ID: {pokemon.pokemon_id}</p>
                     <p>Type: {pokemon_type}</p>
                     <img src="{pokemon.pokemon_sprite}" alt="{pokemon_name} image">
+                    <h1><a href="/">Go back to home</a></h1>
                 </body>
             </html>
         '''
