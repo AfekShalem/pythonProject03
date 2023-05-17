@@ -19,6 +19,8 @@ def home():
             <html>
                 <body>
                 <ul style="list-style:none">
+                <title>Trev and Afek Pokemon Project</title>
+                    <h1>Trev and Afek Pokemon Project</h1>
                     <li><a href="/whos-that-pokemon">Who's That Pokemon?</a></li>
                     <li><a href="/type-quiz">Type Quiz</a></li>
                     <li><a href="/pokemon-search">Pokemon Search</a></li>
